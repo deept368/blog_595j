@@ -1,23 +1,21 @@
 ---
-title: What is the problem with BERT embeddings and how to fix them?
-author: Bohan Li
-date: 2020-11-04
+title: Language modeling via stochastic processes
+author: Deept Mahendiratta
+date: 2022-10-21
 tag:
- - Pre-training
- - BERT
- - Embedding
+    
 category:
  - NLP
 ---
 
 
 This blog presents an easy fix to the sentence embeddings learned by pre-trained language models. 
-It is based on the paper: On the Sentence Embeddings from Pre-trained Language Models by Li et al EMNLP 2020. 
+It is based on the paper: Language modeling via stochastic processes by Wang, R. E., Durmus, E., Goodman, N., & Hashimoto, T. (2022). 
 
 <!-- more -->
 
-Paper: <https://arxiv.org/abs/2011.05864>
-Code: <https://github.com/bohanli/BERT-flow>
+Paper: <https://arxiv.org/abs/2203.11370>
+Code: <https://github.com/rosewang2008/language_modeling_via_stochastic_processes>
 
 
 ## Background
