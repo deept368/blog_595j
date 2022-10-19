@@ -9,26 +9,22 @@ category:
 ---
 
 
-This blog presents an easy fix to the sentence embeddings learned by pre-trained language models. 
+This blog describes a recent work on the challenge of generating long coherent sequences with language models by leveraging goal-conditioned latent paths.
 It is based on the paper: Language modeling via stochastic processes by Wang, R. E., Durmus, E., Goodman, N., & Hashimoto, T. (2022). 
 
 <!-- more -->
 
 Paper: <https://arxiv.org/abs/2203.11370>
+
 Code: <https://github.com/rosewang2008/language_modeling_via_stochastic_processes>
 
 
 ## Background
 
-Recently, pre-trained language models and its variants like BERT have been widely used as representations of natural language. 
+Writing a few lines is an easy chore for most individuals, but even seasoned authors frequently run into difficulties when trying to construct their second chapter. A similar problem plagues today’s large-scaled pretrained language models, such as GPT-2, which excel at short text production but degrade into incoherence when used for lengthier texts. The incapacity of such models to plan or reflect long-range dynamics might be blamed for the failure to evolve texts from beginning to conclusion correctly.
 
-![image1](image1.png)
+To address these challenges, a Stanford University research team introduced Time Control (TC), a language model that implicitly plans using a latent stochastic process and seeks to generate sentences that follow this secret plan. Human assessors scored the outputs 28.6 percent higher than baseline approaches, indicating that the unique strategy enhances performance on long text production.
 
-Photo credit to https://towardsml.com/2019/09/17/bert-explained-a-complete-guide-with-theory-and-tutorial/
-
-Despite their great success on many NLP tasks through fine-tuning, the sentence embeddings from BERT without finetuning are significantly inferior in terms of semantic textual similarity (Reimers and Gurevych, 2019) – for example, they even underperform the GloVe embeddings which are not contextualized and trained with a much simpler model. Such issues hinder applying BERT sentence embeddings directly to many real-world scenarios where collecting labeled data is highlycosting or even intractable.
-
-![image2](image2.png)
 
 ## Major Questions
 
