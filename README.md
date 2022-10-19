@@ -10,6 +10,7 @@ category:
 
 
 This blog describes a recent work on the challenge of generating long coherent sequences with language models by leveraging goal-conditioned latent paths.
+
 It is based on the paper: Language modeling via stochastic processes by Wang, R. E., Durmus, E., Goodman, N., & Hashimoto, T. (2022). 
 
 <!-- more -->
@@ -19,98 +20,64 @@ Paper: <https://arxiv.org/abs/2203.11370>
 Code: <https://github.com/rosewang2008/language_modeling_via_stochastic_processes>
 
 
-## Background
+## Introduction
 
 Writing a few lines is an easy chore for most individuals, but even seasoned authors frequently run into difficulties when trying to construct their second chapter. A similar problem plagues today’s large-scaled pretrained language models, such as GPT-2, which excel at short text production but degrade into incoherence when used for lengthier texts. The incapacity of such models to plan or reflect long-range dynamics might be blamed for the failure to evolve texts from beginning to conclusion correctly.
+
+![image2](./image2.png)
+
+Prior work has explored remedies for this failure mode by using planning-based methods or implicitly learning text dynamics. However, these methods manually specify the text dynamics or sacrifice quality in long-horizon generation.
+
 
 To address these challenges, a Stanford University research team introduced Time Control (TC), a language model that implicitly plans using a latent stochastic process and seeks to generate sentences that follow this secret plan. Human assessors scored the outputs 28.6 percent higher than baseline approaches, indicating that the unique strategy enhances performance on long text production.
 
 
-## Major Questions
-
-In this paper, we aim to answer two major questions: 
-
-- (1) why do the BERT-induced sentence embeddings perform poorly to retrieve semantically similar sentences? Do they carry too little semantic information, or just because the semantic meanings in these embeddings are not exploited properly? 
-
-- (2) If the BERT embeddings capture enough semantic information that is hard to be directly utilized, how can we make it easier without external supervision?
-
-## Our Findings
-
-We argue that the semantic information in the BERT embeddings is not fully exploited. We first reveal the theoretical connection between the masked language model pre-training objective and the semantic similarity task theoretically, and then analyze the BERT sentence embeddings empirically. We find that BERT always induces a non-smooth anisotropic semantic space of sentences, which harms its performance of semantic similarity. 
-
-### The Anisotropic Embedding Space of BERT
-
-Gao et al. (2019) and Wang et al. (2020) have pointed out that, for language modeling, the maximum likelihood training with Equation 1 usually produces an anisotropic word embedding space. “Anisotropic” means word embeddings occupy a narrow cone in the vector space. This phenomenon is also observed in the pretrained Transformers like BERT, GPT-2, etc (Ethayarajh, 2019).
-
-![image3](image3.png)
-
-::: tip 
-The BERT word embedding space. The 2D-scatterplot is achieved via SVD-based dimension reduction. The embeddings are colored according to their associated word frequency.
-:::
-
-### Word Frequency Biases the Embedding Space
-
-However, as discussed by Gao et al. (2019), anisotropy is highly relevant to the imbalance of word frequency. We observe that high-frequency words are all close to the origin, while low-frequency words are far away from the origin.
-
-This phenomenon can be explained through the softmax formulation of (masked) language models. Note that there is a word-frequency term in the decomposition of the dot product between context and word embeddings. Nevertheless, the PMI term is still highly associated with semantic similarity.
-
-<div style="text-align: center">
-    <img src="image4.png" width="400"/>
-    <img src="image5.png" width="400"/>
-</div>
 
 
-::: warning Remark
-We expect the embedding induced similarity to be consistent to semantic similarity.  If embeddings are distributed in different regions according to frequency statistics, the induced similarity is not useful any more.
-:::  
+## Significant Contributions
+The team’s significant contributions are summarised as follows:
 
-![image6](image6.png)
+1. Time Control is a language model derived by the team that explicitly represents latent structure using Brownian bridge dynamics acquired with a new contrastive aim.
+2. Compared to task-specific approaches, the team showed that Time Control creates more or equally coherent text on tasks such as text infilling and forced lengthy text production across various text domains.
+3. By evaluating discourse coherence with human studies, The team demonstrates that their latent representations capture text dynamics competitively.
+4. The relevance of the contrastive aim, enforcing Brownian bridge dynamics, and explicitly modeling latent dynamics are all emphasized in their technique.
 
-### Low-Frequency Words Disperse Sparsely
+## Method
 
-We also observe that, in the learned anisotropic embedding space, high-frequency words concentrates densely to their k-nearest neighbors and low-frequency words disperse sparsely.
+The proposed TC approach learns a latent space with smooth temporal dynamics for modeling and creating coherent text. The researchers devised a unique contrastive goal for learning a latent space with Brownian bridge dynamics and then utilized this latent space to create text that keeps local coherence while displaying better global coherence.
 
-![image7](image7.png)
+![image3](./image3.jpeg)
 
-::: warning Remark
-Due to the sparsity, many “holes” could be formed around the low-frequency words in the embedding space, where the semantic meaning can be poorly defined.
-:::  
+The TC text generation pipeline uses the Brownian bridge process to plan a latent trajectory with a start and finish, then conditionally creates sentences that follow this latent plan.
+
+The intuition is simple: The bridge imposes that a positive triplet (eg. three in-order sentences on Boston) makes up a smooth trajectory. A negative triplet should not construct a smooth trajectory (switching middle sentences with one on New York).
+
+After training the encoder, GPT2 is finetuned to decode from past context and the encoded latent plan. At inference, a latent plan is generated by sampling from the bridge and conditionally generate each sentence using the latent plan.
 
 
-## Proposed Method: BERT-flow
+![image1](./image1.jpeg)
 
-To address these issues, we propose to transform the anisotropic sentence embedding distribution to a smooth and isotropic Gaussian distribution through normalizing flows that are learned with an unsupervised objective. 
+## Discussion and Conclusion
+Four questions were addressed in the team’s empirical study:
 
-A standard Gaussian latent space may have favorable properties which can help with our problem. 
+1. Is it possible to represent local text dynamics using Time Control?
+2. Is it possible for Time Control to create locally coherent language?
+3. Is it possible to represent global text dynamics using Time Control?
+4. Is Time Control capable of producing long, cohesive documents?
 
-- First, standard Gaussian satisfies isotropy.  By fitting a mapping to an isotropic distribution, the singular spectrum of the embedding space can be flattened. In this way, the word frequency-related singular directions, which are the dominating ones, can be suppressed. 
-- Second, the probabilistic density of Gaussian is well defined over the entire real space. This means there are no “hole” areas, which are poorly defined in terms of probability. The helpfulness of Gaussian prior for mitigating the “hole” problem has been widely observed in existing literature of deep latent variable models (e.g., variational auto-encoders).
+For three tasks: discourse coherence, text-infilling, document structure imitating, and extended text production, they compared TC to domain-specific approaches and fine-tuning on GPT-2 across diverse text domains. Wiki section, TM-2, TicketTalk, and Recipe NLG were among the datasets used in the tests.
 
-![image8](image8.png)
+![image5](./image5.png)
 
-## Experiments
+![image6](./image6.png)
 
-Experimental results show that our proposed BERT-flow method obtains significant performance gains over the state-of-the-art sentence embeddings on a variety of semantic textual similarity tasks.
+TC didn’t sacrifice short/mid-range language modeling performance as it improved performance on text infilling and discourse coherence tasks in the tests while preserving text structure for long text generation in terms of ordering (up to +40%) and text length consistency (up to +17%); this demonstrates the proposed method’s ability to generate more locally and globally coherent texts.
 
-### Results w/o NLI Supervision
+![image4](./image4.png)
 
-We perform extensive experiments on 7 standard semantic textual similarity benchmarks without using any downstream supervision. Our empirical results demonstrate that the flow transformation is able to consistently improve BERT by up to 12.70 points with an average of 8.16 points in terms of Spearman correlation between cosine embedding similarity and human annotated similarity.
 
-![image9](image9.png)
 
-### Results w/ NLI Supervision
-
-When combined with external supervision from NLI tasks, our method outperforms the **sentence-BERT** embeddings (Reimers and Gurevych, 2019), leading to new state-of-theart performance. 
-
-![image10](image10.png)
-
-## Conclusion
-
-We investigate the deficiency of the BERT sentence embeddings on semantic textual similarity. We propose a flow-based calibration which can effectively improve the performance. BERT-flow obtains significant performance gains over the SoTA sentence embeddings on a variety of semantic textual similarity tasks.
+According to the team, TC may expand to other domains containing sequential data, such as movies or music, and support arbitrary bridge operations with unknown fixed start and endpoints.
 
 ## Reference 
-- Bohan Li, Hao Zhou, Junxian He, Mingxuan Wang, Yiming Yang, Lei Li. On the Sentence Embeddings from Pre-trained Language Models. EMNLP 2020. 
-- Nils Reimers and Iryna Gurevych. 2019. SentenceBERT: Sentence embeddings using siamese BERT networks. In Proceedings of EMNLP-IJCNLP.
-- Jun Gao, Di He, Xu Tan, Tao Qin, Liwei Wang, and TieYan Liu. 2019. Representation degeneration problem in training natural language generation models. In Proceedings of ICLR.
-- Lingxiao Wang, Jing Huang, Kevin Huang, Ziniu Hu, Guangtao Wang, and Quanquan Gu. 2020. Improving neural language generation with spectrum control. In Proceedings of ICLR.
-- Kawin Ethayarajh. 2019. How contextual are contextualized word representations? comparing the geometry of bert, elmo, and gpt-2 embeddings. In Proceedings of EMNLP-IJCNLP.
+- Wang, R. E., Durmus, E., Goodman, N., & Hashimoto, T. (2022). Language modeling via stochastic processes. arXiv preprint arXiv:2203.11370.
