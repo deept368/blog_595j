@@ -15,6 +15,7 @@ It is based on the paper: Language modeling via stochastic processes by Wang, R.
 <!-- more -->
 
 Paper: <https://arxiv.org/abs/2203.11370>
+
 Code: <https://github.com/rosewang2008/language_modeling_via_stochastic_processes>
 
 
